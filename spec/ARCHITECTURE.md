@@ -223,3 +223,10 @@ type HistoryData = {
 7. [MDN – Page Visibility API](https://developer.mozilla.org/en-US/docs/Web/API/Page_Visibility_API) – אירועי הסתרה וחזרה של אפליקציה.
 8. [Vite PWA – Prompt for Update](https://vite-pwa-org.netlify.app/guide/prompt-for-update) – שליטה בעדכוני Service Worker ללא רענון אוטומטי.
 9. [GitHub Docs – GitHub Actions billing](https://docs.github.com/en/billing/concepts/product-billing/github-actions) – מכסות וחיוב Actions.
+
+## החלטות מרכזיות (ADRs)
+
+### ADR-1: פונט Heebo מקומי באמצעות `@fontsource/heebo`
+**הקשר:** ה-Style Guide מגדיר את Heebo כגופן ראשי, אך סעיף 2.7 אוסר תלות בפונטים מ-CDN חיצוני כדי שהאפליקציה תעבוד Offline.
+**החלטה:** הפונט נארז עם האפליקציה מחבילת npm `@fontsource/heebo` (משקלים 400/600/700) ונטען ב-`src/main.tsx`, במקום Google Fonts. Fallback: `Arial, sans-serif`.
+**השלכות:** קובצי הפונט הופכים לחלק מתוצר ה-Build ויכללו ב-Precache של ה-PWA ב-Milestone 5; תלות Runtime קטנה נוספת אחת; אין בקשות רשת לשרת חיצוני.

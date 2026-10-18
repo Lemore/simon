@@ -1,0 +1,90 @@
+:root {
+  /* Style Guide palette */
+  --green: #00d26a;
+  --red: #ff3b30;
+  --yellow: #ffd600;
+  --blue: #00a3ff;
+  --charcoal: #0f0f0f;
+  --soft-gray: #e5e5e5;
+  --white: #ffffff;
+
+  /* Dark theme surfaces: approximated from the mockups (no exact HEX in the Style Guide). */
+  --bg: #0b1426;
+  --bg-deep: #050a14;
+  --surface: #121e36;
+  --border: rgb(0 163 255 / 28%);
+  --text: var(--soft-gray);
+  --text-muted: #9aa8c2;
+
+  /* Spacing scale */
+  --space-1: 8px;
+  --space-2: 12px;
+  --space-3: 16px;
+  --space-4: 24px;
+
+  /* Typography */
+  --fs-h1: 32px;
+  --fs-h2: 24px;
+  --fs-h3: 20px;
+  --fs-body: 16px;
+  --fs-caption: 14px;
+  --fs-button: 16px;
+
+  font-family: 'Heebo', Arial, sans-serif;
+  font-size: var(--fs-body);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--text);
+  background: var(--bg-deep);
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: radial-gradient(ellipse at 50% 0%, #13223f 0%, var(--bg) 45%, var(--bg-deep) 100%)
+    fixed;
+}
+
+button {
+  font-family: inherit;
+}
+
+button:focus-visible {
+  outline: 3px solid var(--white);
+  outline-offset: 2px;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  max-width: 480px;
+  height: 100dvh;
+  margin: 0 auto;
+  padding-top: env(safe-area-inset-top);
+  padding-bottom: env(safe-area-inset-bottom);
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+.app-content {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition: none !important;
+    animation: none !important;
+  }
+}

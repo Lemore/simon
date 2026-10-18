@@ -1,0 +1,82 @@
+.simon-board {
+  --board-size: min(84vw, 340px, 42dvh);
+  --gap: calc(var(--board-size) * 0.04);
+
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  grid-template-rows: 1fr 1fr;
+  gap: var(--gap);
+  width: var(--board-size);
+  height: var(--board-size);
+  padding: var(--gap);
+  border-radius: 50%;
+  background: var(--charcoal);
+  box-shadow:
+    0 0 0 3px #1c2740,
+    0 0 40px rgb(0 163 255 / 22%),
+    0 14px 30px rgb(0 0 0 / 55%);
+}
+
+.simon-board__pad {
+  padding: 0;
+  border: none;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow:
+    inset 0 -6px 12px rgb(0 0 0 / 28%),
+    inset 0 4px 10px rgb(255 255 255 / 25%);
+  transition: filter 0.12s, opacity 0.12s, box-shadow 0.12s;
+}
+
+/* Each pad rounds only its outer corner so the four together form a circle. */
+.simon-board__pad--green {
+  background: var(--green);
+  border-top-left-radius: 100%;
+}
+
+.simon-board__pad--red {
+  background: var(--red);
+  border-top-right-radius: 100%;
+}
+
+.simon-board__pad--yellow {
+  background: var(--yellow);
+  border-bottom-left-radius: 100%;
+}
+
+.simon-board__pad--blue {
+  background: var(--blue);
+  border-bottom-right-radius: 100%;
+}
+
+/* States used by upcoming milestones (playback glow, paused). */
+.simon-board__pad.is-lit {
+  filter: brightness(1.35) saturate(1.1);
+  box-shadow:
+    0 0 28px 6px currentColor,
+    inset 0 4px 10px rgb(255 255 255 / 45%);
+}
+
+.simon-board__pad.is-dimmed {
+  opacity: 0.4;
+  filter: saturate(0.6);
+}
+
+.simon-board__center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38%;
+  height: 38%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 50% 35%, #2a2f3a, var(--charcoal) 70%);
+  box-shadow:
+    0 0 0 calc(var(--gap) * 0.6) var(--charcoal),
+    inset 0 2px 6px rgb(255 255 255 / 8%);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
