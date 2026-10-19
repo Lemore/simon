@@ -7,7 +7,7 @@ const run = (state: GameState, ...actions: GameAction[]) => actions.reduce(gameR
 
 function started(firstColor: SimonColor = 'green') {
   const presenting = gameReducer(initialGameState, { type: 'START', firstColor })
-  return gameReducer(presenting, { type: 'PRESENTATION_DONE', gameId: presenting.gameId })
+  return gameReducer(presenting, { type: 'PRESENTATION_DONE', presentationId: presenting.presentationId })
 }
 
 // Repeats the current sequence correctly, then lets the next presentation finish.
@@ -17,7 +17,7 @@ function completeRound(state: GameState, nextColor: SimonColor): GameState {
     next = gameReducer(next, { type: 'PRESS', color, nextColor })
   }
   if (next.status === 'presenting') {
-    next = gameReducer(next, { type: 'PRESENTATION_DONE', gameId: next.gameId })
+    next = gameReducer(next, { type: 'PRESENTATION_DONE', presentationId: next.presentationId })
   }
   return next
 }
@@ -120,10 +120,117 @@ describe('gameReducer', () => {
     expect(gameReducer(presenting, { type: 'START', firstColor: 'red' })).toBe(presenting)
   })
 
-  it('ignores a stale PRESENTATION_DONE from another game', () => {
+  it('ignores a stale PRESENTATION_DONE from an earlier presentation', () => {
     const presenting = gameReducer(initialGameState, { type: 'START', firstColor: 'green' })
-    const stale = gameReducer(presenting, { type: 'PRESENTATION_DONE', gameId: presenting.gameId - 1 })
+    const stale = gameReducer(presenting, {
+      type: 'PRESENTATION_DONE',
+      presentationId: presenting.presentationId - 1,
+    })
     expect(stale).toBe(presenting)
+  })
+})
+
+describe('gameReducer pause and resume', () => {
+  // Round 3, two correct presses into the player's turn.
+  function midInput() {
+    let state = started('green')
+    state = completeRound(state, 'red')
+    state = completeRound(state, 'blue')
+    return run(
+      state,
+      { type: 'PRESS', color: state.sequence[0], nextColor: 'red' },
+      { type: 'PRESS', color: state.sequence[1], nextColor: 'red' },
+    )
+  }
+
+  it('pauses during the presentation, keeping sequence and round', () => {
+    const presenting = gameReducer(initialGameState, { type: 'START', firstColor: 'yellow' })
+    const paused = gameReducer(presenting, { type: 'PAUSE' })
+    expect(paused).toEqual({ ...presenting, status: 'paused', pausedFrom: 'presenting' })
+  })
+
+  it('pauses during input and drops the partial input of the round', () => {
+    const state = midInput()
+    expect(state.inputIndex).toBe(2)
+    const paused = gameReducer(state, { type: 'PAUSE' })
+    expect(paused).toMatchObject({
+      status: 'paused',
+      inputIndex: 0,
+      round: 3,
+      completedRounds: 2,
+      sequence: ['green', 'red', 'blue'],
+    })
+  })
+
+  it('ignores PAUSE when no game is active or it is already paused', () => {
+    const lost = run(started('green'), { type: 'PRESS', color: 'red', nextColor: 'red' })
+    const won = { ...lost, status: 'won' as const }
+    const paused = gameReducer(started('green'), { type: 'PAUSE' })
+    for (const state of [initialGameState, lost, won, paused]) {
+      expect(gameReducer(state, { type: 'PAUSE' })).toBe(state)
+    }
+  })
+
+  it('resumes a game paused during the presentation by presenting the full sequence again', () => {
+    let state = completeRound(completeRound(started('green'), 'red'), 'blue')
+    state = completeRound(state, 'yellow')
+    // Round 4 is being presented after the last correct press.
+    state = run(state, ...state.sequence.map((color) => ({ type: 'PRESS', color, nextColor: 'yellow' }) as GameAction))
+    expect(state.status).toBe('presenting')
+
+    const paused = gameReducer(state, { type: 'PAUSE' })
+    const resumed = gameReducer(paused, { type: 'RESUME' })
+    expect(resumed).toMatchObject({
+      status: 'presenting',
+      inputIndex: 0,
+      round: state.round,
+      sequence: state.sequence,
+      gameId: state.gameId,
+      pausedFrom: null,
+    })
+    expect(resumed.presentationId).toBe(paused.presentationId + 1)
+  })
+
+  it('resumes a game paused during the player turn straight to input, without replaying', () => {
+    const paused = gameReducer(midInput(), { type: 'PAUSE' })
+    const resumed = gameReducer(paused, { type: 'RESUME' })
+    expect(resumed).toMatchObject({
+      status: 'awaitingInput',
+      inputIndex: 0,
+      round: 3,
+      completedRounds: 2,
+      sequence: ['green', 'red', 'blue'],
+      pausedFrom: null,
+    })
+    expect(resumed.presentationId).toBe(paused.presentationId)
+
+    // The player then repeats the sequence from the start.
+    const next = completeRound(resumed, 'yellow')
+    expect(next).toMatchObject({ status: 'awaitingInput', round: 4, completedRounds: 3 })
+  })
+
+  it('ignores RESUME unless paused (a double resume presents once)', () => {
+    const resumed = run(started('green'), { type: 'PAUSE' }, { type: 'RESUME' })
+    expect(gameReducer(resumed, { type: 'RESUME' })).toBe(resumed)
+    expect(gameReducer(initialGameState, { type: 'RESUME' })).toBe(initialGameState)
+  })
+
+  it('ignores the completion of a presentation cancelled by the pause', () => {
+    const presenting = gameReducer(initialGameState, { type: 'START', firstColor: 'green' })
+    const resumed = run(presenting, { type: 'PAUSE' }, { type: 'RESUME' })
+    const stale = gameReducer(resumed, {
+      type: 'PRESENTATION_DONE',
+      presentationId: presenting.presentationId,
+    })
+    expect(stale).toBe(resumed)
+  })
+
+  it('ignores presses and START while paused, and never turns a pause into a loss', () => {
+    const paused = gameReducer(started('green'), { type: 'PAUSE' })
+    expect(gameReducer(paused, { type: 'PRESS', color: 'red', nextColor: 'red' })).toBe(paused)
+    expect(gameReducer(paused, { type: 'START', firstColor: 'red' })).toBe(paused)
+    expect(paused.status).toBe('paused')
+    expect(paused.completedRounds).toBe(0)
   })
 })
 

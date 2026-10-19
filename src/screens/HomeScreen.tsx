@@ -10,12 +10,13 @@ type HomeScreenProps = {
   litColor: SimonColor | null
   audioError: boolean
   onStart: () => void
+  onResume: () => void
   onPadPress: (color: SimonColor) => void
 }
 
 const AUDIO_ERROR_TEXT = 'לא ניתן להפעיל את הצלילים. נסה ללחוץ שוב.'
 
-export default function HomeScreen({ game, litColor, audioError, onStart, onPadPress }: HomeScreenProps) {
+export default function HomeScreen({ game, litColor, audioError, onStart, onResume, onPadPress }: HomeScreenProps) {
   const { status } = game
   const gameOver = status === 'won' || status === 'lost'
 
@@ -25,6 +26,8 @@ export default function HomeScreen({ game, litColor, audioError, onStart, onPadP
     statusText = AUDIO_ERROR_TEXT
   } else if (status === 'presenting') {
     statusText = 'המשחק מציג את הרצף'
+  } else if (status === 'paused') {
+    statusText = 'המשחק מושהה'
   } else if (status === 'awaitingInput') {
     statusText = 'התור שלך'
     hintText = 'הקש על הצבעים לפי הסדר'
@@ -48,13 +51,14 @@ export default function HomeScreen({ game, litColor, audioError, onStart, onPadP
 
       <SimonBoard
         litColor={litColor}
-        dimmed={status === 'presenting'}
+        dimmed={status === 'presenting' || status === 'paused'}
         inputEnabled={status === 'awaitingInput'}
         onPadPress={onPadPress}
       />
 
       <div className="home-screen__actions">
         {status === 'idle' && <PrimaryButton onClick={onStart}>התחל</PrimaryButton>}
+        {status === 'paused' && <PrimaryButton onClick={onResume}>המשך משחק</PrimaryButton>}
         {status === 'awaitingInput' && <p className="home-screen__hint">{hintText}</p>}
       </div>
 

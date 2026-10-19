@@ -8,7 +8,13 @@ import HomeScreen from './screens/HomeScreen.tsx'
 // so switching screens never resets an active game.
 export default function App() {
   const [screen, setScreen] = useState<Screen>('home')
-  const { state, litColor, audioError, start, pressPad } = useGame()
+  const { state, litColor, audioError, start, pause, resume, pressPad } = useGame()
+
+  // Leaving the home screen pauses an active game; returning never resumes it by itself.
+  const changeScreen = (next: Screen) => {
+    if (next !== 'home') pause()
+    setScreen(next)
+  }
 
   return (
     <div className="app">
@@ -19,13 +25,14 @@ export default function App() {
             litColor={litColor}
             audioError={audioError}
             onStart={() => void start()}
+            onResume={() => void resume()}
             onPadPress={pressPad}
           />
         ) : (
           <AboutScreen />
         )}
       </main>
-      <BottomNav active={screen} onChange={setScreen} />
+      <BottomNav active={screen} onChange={changeScreen} />
     </div>
   )
 }

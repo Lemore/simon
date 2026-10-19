@@ -1,6 +1,6 @@
 import confetti from 'canvas-confetti'
-import { useCallback, useEffect, useReducer, useRef, useState } from 'react'
-import { playLossSound, playTone, playWinSound, unlockAudio } from '../audio/audioEngine.ts'
+import { useCallback, useEffect, useLayoutEffect, useReducer, useRef, useState } from 'react'
+import { playLossSound, playTone, playWinSound, stopAll, unlockAudio } from '../audio/audioEngine.ts'
 import type { SimonColor } from './colors.ts'
 import { gameReducer, initialGameState } from './gameReducer.ts'
 import { playSequence } from './playback.ts'
@@ -24,19 +24,25 @@ export function useGame() {
   const [litColor, setLitColor] = useState<SimonColor | null>(null)
   const [audioError, setAudioError] = useState(false)
   const pressTimer = useRef<number | undefined>(undefined)
+  const resuming = useRef(false)
+  // Latest status, for event handlers that must not re-subscribe on every change.
+  const statusRef = useRef(state.status)
+  useLayoutEffect(() => {
+    statusRef.current = state.status
+  }, [state.status])
 
-  // Sequence playback while presenting; cancelled on any state change or unmount.
+  // Sequence playback while presenting; cancelled on any state change (e.g. pause) or unmount.
   useEffect(() => {
     if (state.status !== 'presenting') return
     const controller = new AbortController()
-    const gameId = state.gameId
+    const presentationId = state.presentationId
     playSequence(state.sequence, {
       onLight: setLitColor,
-      onDone: () => dispatch({ type: 'PRESENTATION_DONE', gameId }),
+      onDone: () => dispatch({ type: 'PRESENTATION_DONE', presentationId }),
       signal: controller.signal,
     })
     return () => controller.abort()
-  }, [state.status, state.gameId, state.sequence])
+  }, [state.status, state.presentationId, state.sequence])
 
   // End-of-game feedback: sound for both outcomes, confetti on a win only.
   useEffect(() => {
@@ -58,6 +64,29 @@ export function useGame() {
 
   useEffect(() => () => window.clearTimeout(pressTimer.current), [])
 
+  // Pauses an active game and silences it immediately. Safe to call in any state.
+  const pause = useCallback(() => {
+    const status = statusRef.current
+    if (status !== 'presenting' && status !== 'awaitingInput') return
+    window.clearTimeout(pressTimer.current)
+    setLitColor(null)
+    stopAll()
+    dispatch({ type: 'PAUSE' })
+  }, [])
+
+  // Hiding the app (other app, locked phone, other tab) pauses; coming back never resumes by itself.
+  useEffect(() => {
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'hidden') pause()
+    }
+    document.addEventListener('visibilitychange', onVisibilityChange)
+    window.addEventListener('pagehide', pause)
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibilityChange)
+      window.removeEventListener('pagehide', pause)
+    }
+  }, [pause])
+
   const start = useCallback(async () => {
     const ok = await unlockAudio()
     if (!ok) {
@@ -66,6 +95,19 @@ export function useGame() {
     }
     setAudioError(false)
     dispatch({ type: 'START', firstColor: randomColor() })
+  }, [])
+
+  // Called from the "המשך משחק" tap, which also re-unlocks audio after the app was in the background.
+  const resume = useCallback(async () => {
+    if (resuming.current || statusRef.current !== 'paused') return
+    resuming.current = true
+    try {
+      const ok = await unlockAudio()
+      setAudioError(!ok)
+      if (ok) dispatch({ type: 'RESUME' })
+    } finally {
+      resuming.current = false
+    }
   }, [])
 
   const pressPad = useCallback(
@@ -80,5 +122,5 @@ export function useGame() {
     [state.status],
   )
 
-  return { state, litColor, audioError, start, pressPad }
+  return { state, litColor, audioError, start, pause, resume, pressPad }
 }
