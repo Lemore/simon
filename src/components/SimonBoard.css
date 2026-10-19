@@ -32,29 +32,40 @@
   transition: filter 0.12s, opacity 0.12s, box-shadow 0.12s;
 }
 
+/* Disabled pads keep their full look (the board is still shown); only input is blocked. */
+.simon-board__pad:disabled {
+  cursor: default;
+}
+
 /* Each pad rounds only its outer corner so the four together form a circle. */
 .simon-board__pad--green {
+  color: var(--green);
   background: var(--green);
   border-top-left-radius: 100%;
 }
 
 .simon-board__pad--red {
+  color: var(--red);
   background: var(--red);
   border-top-right-radius: 100%;
 }
 
 .simon-board__pad--yellow {
+  color: var(--yellow);
   background: var(--yellow);
   border-bottom-left-radius: 100%;
 }
 
 .simon-board__pad--blue {
+  color: var(--blue);
   background: var(--blue);
   border-bottom-right-radius: 100%;
 }
 
-/* States used by upcoming milestones (playback glow, paused). */
+/* Lit pad (playback or player tap) and dimmed pads (during playback). */
 .simon-board__pad.is-lit {
+  position: relative;
+  z-index: 1;
   filter: brightness(1.35) saturate(1.1);
   box-shadow:
     0 0 28px 6px currentColor,
@@ -77,6 +88,7 @@
   box-shadow:
     0 0 0 calc(var(--gap) * 0.6) var(--charcoal),
     inset 0 2px 6px rgb(255 255 255 / 8%);
+  z-index: 2;
   transform: translate(-50%, -50%);
   pointer-events: none;
 }

@@ -1,0 +1,53 @@
+/* Scrim over the home screen; the board stays recognizable behind it. */
+.game-over {
+  position: absolute;
+  inset: 0;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-3);
+  background: rgb(5 10 20 / 62%);
+}
+
+.game-over__card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  max-width: 320px;
+  padding: var(--space-4) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface);
+  text-align: center;
+  box-shadow:
+    0 0 32px rgb(0 163 255 / 25%),
+    0 14px 30px rgb(0 0 0 / 55%);
+}
+
+.game-over__title {
+  margin: 0;
+  font-size: var(--fs-h1);
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.game-over__card--won .game-over__title {
+  color: var(--green);
+  text-shadow: 0 0 14px rgb(0 210 106 / 55%);
+}
+
+.game-over__card--lost .game-over__title {
+  color: var(--red);
+  text-shadow: 0 0 14px rgb(255 59 48 / 50%);
+}
+
+.game-over__details {
+  margin: 0 0 var(--space-2);
+  font-size: var(--fs-h3);
+  font-weight: 600;
+  color: var(--text);
+  unicode-bidi: isolate;
+}

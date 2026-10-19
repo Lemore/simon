@@ -1,4 +1,5 @@
 .home-screen {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -55,10 +56,25 @@
   color: var(--text-muted);
 }
 
+.home-screen__status--error {
+  color: var(--red);
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Fixed height keeps the board from jumping when the button or hint swaps. */
 .home-screen__actions {
   display: flex;
+  align-items: center;
   justify-content: center;
   width: 100%;
+  min-height: 52px;
+}
+
+.home-screen__hint {
+  margin: 0;
+  font-size: var(--fs-body);
+  color: var(--text-muted);
 }
 
 /* Short phones: tighten vertical spacing so the action stays above the fold. */
