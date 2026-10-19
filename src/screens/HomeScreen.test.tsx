@@ -149,11 +149,12 @@ describe('Home screen game flow', () => {
     expect(playWinSound).toHaveBeenCalledTimes(1)
     expect(playLossSound).not.toHaveBeenCalled()
     expect(confetti).toHaveBeenCalledTimes(1)
-    // The active game is never persisted.
-    expect(setItem).not.toHaveBeenCalled()
+    // The active game is never persisted; only the finished result goes to the history.
+    expect(setItem).toHaveBeenCalledTimes(1)
+    expect(setItem.mock.calls[0][0]).toBe('simon.history.v1')
   })
 
-  it('"שחק שוב" starts a new game from round 1 with a new random sequence', async () => {
+  it('"שחק שוב" returns to the start screen; "התחל" then starts a new game with a new sequence', async () => {
     render(<App />)
     await clickStart()
     finishPresentation()
@@ -168,6 +169,13 @@ describe('Home screen game flow', () => {
 
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByText('שלב 1 מתוך 10')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'התחל' })).toBeInTheDocument()
+    // Nothing plays until the player taps "התחל".
+    finishPresentation()
+    expect(playTone).not.toHaveBeenCalled()
+    expect(pad('blue')).toBeDisabled()
+
+    await clickStart()
     finishPresentation()
     expect(vi.mocked(playTone).mock.calls).toEqual([['blue', expect.any(Number)]])
 

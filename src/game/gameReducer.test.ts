@@ -243,4 +243,26 @@ describe('randomColor', () => {
       'blue',
     ])
   })
+
+  describe('RESET', () => {
+    it('goes from a finished game back to idle, keeping the ids counting', () => {
+      let state = gameReducer(initialGameState, { type: 'START', firstColor: 'green' })
+      state = gameReducer(state, { type: 'PRESENTATION_DONE', presentationId: state.presentationId })
+      state = gameReducer(state, { type: 'PRESS', color: 'red', nextColor: 'blue' })
+      expect(state.status).toBe('lost')
+
+      const reset = gameReducer(state, { type: 'RESET' })
+      expect(reset).toEqual({ ...initialGameState, gameId: state.gameId, presentationId: state.presentationId })
+
+      const next = gameReducer(reset, { type: 'START', firstColor: 'yellow' })
+      expect(next.gameId).toBe(state.gameId + 1)
+    })
+
+    it('is ignored while a game is active or paused', () => {
+      const presenting = gameReducer(initialGameState, { type: 'START', firstColor: 'green' })
+      expect(gameReducer(presenting, { type: 'RESET' })).toBe(presenting)
+      const paused = gameReducer(presenting, { type: 'PAUSE' })
+      expect(gameReducer(paused, { type: 'RESET' })).toBe(paused)
+    })
+  })
 })

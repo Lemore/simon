@@ -11,12 +11,13 @@ type HomeScreenProps = {
   audioError: boolean
   onStart: () => void
   onResume: () => void
+  onPlayAgain: () => void
   onPadPress: (color: SimonColor) => void
 }
 
 const AUDIO_ERROR_TEXT = 'לא ניתן להפעיל את הצלילים. נסה ללחוץ שוב.'
 
-export default function HomeScreen({ game, litColor, audioError, onStart, onResume, onPadPress }: HomeScreenProps) {
+export default function HomeScreen({ game, litColor, audioError, onStart, onResume, onPlayAgain, onPadPress }: HomeScreenProps) {
   const { status } = game
   const gameOver = status === 'won' || status === 'lost'
 
@@ -67,7 +68,7 @@ export default function HomeScreen({ game, litColor, audioError, onStart, onResu
           key={game.gameId}
           outcome={status}
           completedRounds={game.completedRounds}
-          onPlayAgain={onStart}
+          onPlayAgain={onPlayAgain}
         />
       )}
     </section>

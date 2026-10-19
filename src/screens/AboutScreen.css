@@ -52,3 +52,76 @@
   text-align: center;
   color: var(--text-muted);
 }
+
+.about-screen__error {
+  margin: 0;
+  padding: var(--space-2) var(--space-3);
+  border: 1px solid rgb(255 59 48 / 55%);
+  border-radius: 12px;
+  background: rgb(255 59 48 / 12%);
+  color: var(--soft-gray);
+  font-size: var(--fs-caption);
+}
+
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.history-card {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-3);
+}
+
+.history-card__main p {
+  margin: 0;
+  line-height: 1.5;
+}
+
+.history-card__outcome {
+  font-weight: 600;
+}
+
+.history-card__outcome--win {
+  color: var(--green);
+}
+
+.history-card__outcome--loss {
+  color: #ff7a70;
+}
+
+.history-card__time {
+  flex-shrink: 0;
+  color: var(--text-muted);
+  font-size: var(--fs-caption);
+  direction: ltr;
+  unicode-bidi: isolate;
+}
+
+/* Destructive but restrained: outline, not the main blue button. */
+.about-screen__delete {
+  align-self: center;
+  width: 100%;
+  max-width: 320px;
+  min-height: 48px;
+  margin-top: var(--space-1);
+  border: 1px solid var(--red);
+  border-radius: 999px;
+  background: transparent;
+  color: #ff7a70;
+  font: inherit;
+  font-size: var(--fs-button);
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.about-screen__delete:active {
+  background: rgb(255 59 48 / 12%);
+}

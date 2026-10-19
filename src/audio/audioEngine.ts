@@ -17,7 +17,7 @@ function isRunning(context: AudioContext) {
   return context.state === 'running'
 }
 
-// Must be called from inside a user gesture (tap on "התחל" / "שחק שוב").
+// Must be called from inside a user gesture (tap on "התחל" / "המשך משחק").
 // Resolves to false when sound cannot be started, so the game never runs silently by mistake.
 export async function unlockAudio(): Promise<boolean> {
   try {

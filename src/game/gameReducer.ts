@@ -24,6 +24,7 @@ export type GameAction =
   | { type: 'PRESS'; color: SimonColor; nextColor: SimonColor }
   | { type: 'PAUSE' }
   | { type: 'RESUME' }
+  | { type: 'RESET' }
 
 export const initialGameState: GameState = {
   status: 'idle',
@@ -89,6 +90,12 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case 'PAUSE':
       if (state.status !== 'presenting' && state.status !== 'awaitingInput') return state
       return { ...state, status: 'paused', inputIndex: 0, pausedFrom: state.status }
+
+    // "שחק שוב" closes a finished game and goes back to the start screen.
+    // gameId and presentationId keep counting, so the next game is never mistaken for this one.
+    case 'RESET':
+      if (state.status !== 'won' && state.status !== 'lost') return state
+      return { ...initialGameState, gameId: state.gameId, presentationId: state.presentationId }
 
     // Paused during the presentation: replay the full sequence of the same round (no new color).
     // Paused during the player's turn: the sequence was already seen, so go straight back to input,

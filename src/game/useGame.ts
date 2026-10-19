@@ -110,6 +110,8 @@ export function useGame() {
     }
   }, [])
 
+  const reset = useCallback(() => dispatch({ type: 'RESET' }), [])
+
   const pressPad = useCallback(
     (color: SimonColor) => {
       if (state.status !== 'awaitingInput') return
@@ -122,5 +124,5 @@ export function useGame() {
     [state.status],
   )
 
-  return { state, litColor, audioError, start, pause, resume, pressPad }
+  return { state, litColor, audioError, start, pause, resume, reset, pressPad }
 }
