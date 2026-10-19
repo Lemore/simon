@@ -59,3 +59,5 @@
 > Claude ממלא זאת ברגע שהאפליקציה יכולה לרוץ (בדרך כלל בסיום Milestone 1), ומעדכן אם משהו משתנה.
 - **הרצה (dev):** `npm run dev` (נפתח ב-http://localhost:5173)
 - **בדיקות (test):** `npm run test` (וגם `npm run typecheck`, `npm run build`)
+- **בדיקת PWA/Offline מקומית:** `npm run build` ואז `npm run preview` (נפתח ב-http://localhost:4173/simon/)
+- **אתר מפורסם:** https://lemore.github.io/simon/ (פריסה אוטומטית ב-GitHub Actions אחרי Push ל-`main`)

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import BottomNav, { type Screen } from './components/BottomNav.tsx'
 import { useGame } from './game/useGame.ts'
 import { useHistory } from './history/useHistory.ts'
+import UpdatePrompt from './pwa/UpdatePrompt.tsx'
 import AboutScreen from './screens/AboutScreen.tsx'
 import HomeScreen from './screens/HomeScreen.tsx'
 
@@ -48,6 +49,11 @@ export default function App() {
           />
         )}
       </main>
+      <UpdatePrompt
+        gameActive={
+          state.status === 'presenting' || state.status === 'awaitingInput' || state.status === 'paused'
+        }
+      />
       <BottomNav active={screen} onChange={changeScreen} />
     </div>
   )
